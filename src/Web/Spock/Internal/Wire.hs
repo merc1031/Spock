@@ -54,9 +54,10 @@ import qualified Network.Wai.Parse as P
 instance Hashable StdMethod where
     hashWithSalt = hashUsing fromEnum
 
-data SpockMethod = Standard StdMethod
-            | Custom T.Text
-            deriving Eq
+data SpockMethod
+   = Standard StdMethod
+   | Custom T.Text
+     deriving Eq
 
 instance Hashable SpockMethod where
     hashWithSalt s (Standard m) =
@@ -411,20 +412,14 @@ buildMiddleware mLimit registryIf registryLift spockActions =
        let spockMiddleware = foldl (.) id middlewares
            app :: Wai.Application -> Wai.Application
            app coreApp req respond =
-            parseMethod' (Wai.requestMethod req) $ \method -> do
+            parseSpockMethod (Wai.requestMethod req) $ \method -> do
                 let allActions = getMatchingRoutes method (Wai.pathInfo req)
                 runResourceT $ withInternalState $ \st ->
                     handleRequest method mLimit registryLift allActions st coreApp req respond
---            case parseMethod $ Wai.requestMethod req of
---              Left _ ->
---                  respond invalidReq
---              Right stdMethod ->
---                  do let allActions = getMatchingRoutes stdMethod (Wai.pathInfo req)
---                     runResourceT $ withInternalState $ \st ->
---                         handleRequest stdMethod mLimit registryLift allActions st coreApp req respond
        return $ spockMiddleware . app
 
-parseMethod' method cnt =
+parseSpockMethod :: forall t. Method -> (SpockMethod -> t) -> t
+parseSpockMethod method cnt =
     case parseMethod method of
       Left _ ->
         cnt (Custom $ T.decodeUtf8 method)

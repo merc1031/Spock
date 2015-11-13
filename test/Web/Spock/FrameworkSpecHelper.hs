@@ -77,6 +77,7 @@ routingSpec =
             do get "/test-slash" `shouldRespondWith` "ok" { matchStatus = 200 }
                get "test-slash" `shouldRespondWith` "ok" { matchStatus = 200 }
                get "/test-noslash" `shouldRespondWith` "ok" { matchStatus = 200 }
+               get "test-noslash" `shouldRespondWith` "ok" { matchStatus = 200 }
          it "allows custom verbs" $
             request "NOTIFY" "/notify/itnotifies" [] "" `shouldRespondWith` "itnotifies" { matchStatus = 200 }
     where
