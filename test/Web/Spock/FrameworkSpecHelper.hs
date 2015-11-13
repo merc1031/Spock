@@ -69,13 +69,16 @@ routingSpec =
                get "/subcomponent/subcomponent2/bar" `shouldRespondWith` "bar" { matchStatus = 200 }
          it "allows the definition of a fallback handler" $
             get "/askldjas/aklsdj" `shouldRespondWith` "askldjas/aklsdj" { matchStatus = 200 }
+         it "allows the definition of a fallback handler for custom verb" $
+            request "MYVERB" "/askldjas/aklsdj" [] "" `shouldRespondWith` "askldjas/aklsdj" { matchStatus = 200 }
          it "detected the preferred format" $
             request "GET" "/preferred-format" [("Accept", "text/html,application/xml;q=0.9,image/webp,*/*;q=0.8")] "" `shouldRespondWith` "html" { matchStatus = 200 }
          it "/test-slash and test-noslash are the same thing" $
             do get "/test-slash" `shouldRespondWith` "ok" { matchStatus = 200 }
                get "test-slash" `shouldRespondWith` "ok" { matchStatus = 200 }
                get "/test-noslash" `shouldRespondWith` "ok" { matchStatus = 200 }
-               get "test-noslash" `shouldRespondWith` "ok" { matchStatus = 200 }
+         it "allows custom verbs" $
+            request "NOTIFY" "/notify/itnotifies" [] "" `shouldRespondWith` "itnotifies" { matchStatus = 200 }
     where
       verbTestGp verb verbVerbose =
           verb "/verb-test-gp" `shouldRespondWith` (verbVerbose { matchStatus = 200 })
